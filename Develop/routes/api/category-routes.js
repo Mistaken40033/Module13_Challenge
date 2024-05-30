@@ -1,4 +1,3 @@
-// Import
 const router = require("express").Router();
 const { Category, Product } = require("../../models");
 
@@ -15,12 +14,8 @@ router.get("/", (req, res) => {
       },
     ],
   })
-    .then((data) => {
-      res.json(data);
-    })
-    .catch((err) => {
-      res.status(400).json(err);
-    });
+    .then((data) => res.status(200).json(data))
+    .catch((err) => res.status(500).json({ error: err.message }));
 });
 
 router.get("/:id", (req, res) => {
@@ -38,23 +33,24 @@ router.get("/:id", (req, res) => {
     ],
   })
     .then((data) => {
-      res.json(data);
+      if (!data) {
+        res.status(404).json({ error: "Category not found" });
+      } else {
+        res.status(200).json(data);
+      }
     })
-    .catch((err) => {
-      res.status(400).json(err);
-    });
+    .catch((err) => res.status(500).json({ error: err.message }));
 });
 
 router.post("/", (req, res) => {
   // create a new category
-  console.log(req.body);
+  if (!req.body.category_name) {
+    return res.status(400).json({ error: "Category name is required" });
+  }
+
   Category.create({ category_name: req.body.category_name })
-    .then((data) => {
-      res.json(data);
-    })
-    .catch((err) => {
-      res.status(400).json(err);
-    });
+    .then((data) => res.status(201).json(data))
+    .catch((err) => res.status(500).json({ error: err.message }));
 });
 
 router.put("/:id", (req, res) => {
@@ -65,11 +61,13 @@ router.put("/:id", (req, res) => {
     },
   })
     .then((data) => {
-      res.json(data);
+      if (data[0] === 0) {
+        res.status(404).json({ error: "Category not found" });
+      } else {
+        res.status(200).json({ message: "Category updated successfully" });
+      }
     })
-    .catch((err) => {
-      res.status(400).json(err);
-    });
+    .catch((err) => res.status(500).json({ error: err.message }));
 });
 
 router.delete("/:id", (req, res) => {
@@ -80,12 +78,13 @@ router.delete("/:id", (req, res) => {
     },
   })
     .then((data) => {
-      res.json(data);
+      if (data === 0) {
+        res.status(404).json({ error: "Category not found" });
+      } else {
+        res.status(200).json({ message: "Category deleted successfully" });
+      }
     })
-    .catch((err) => {
-      res.status(400).json(err);
-    });
+    .catch((err) => res.status(500).json({ error: err.message }));
 });
 
-// Export
 module.exports = router;
